@@ -122,7 +122,11 @@
       z-index: 999;
       display: none;
     }
-    
+
+    .video2{
+      display:block;
+      width:100%;
+    }
     video {
       display: block;
       width:100%;
@@ -148,14 +152,11 @@
       margin: 0 auto; /* Center the video inside its container */
     }
     /* Remove borders from container sides */
-    /* Remove borders from container sides */
     .container {
       border-left: none;
       border-right: none;
     }
   </style>
-
-  
   
 </head>
 <body>
@@ -168,8 +169,8 @@
 
     <div class="right">
 
-      <div class="instruction-vid">
-        <video controls class="w-full rounded-xl shadow-lg">
+      <div class="w-full max-w-4xl mx-auto">
+        <video id="video2" controls class="w-full rounded-xl shadow-lg">
           <source src="/ExerciseCounter-Video.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
@@ -185,7 +186,9 @@
   </div>
 
   <div id="countdownOverlay">3</div>
-  <!-- <video id="video" autoplay playsinline></video> -->
+  <video style="display:none;" id="video" autoplay playsinline></video>
+
+  
 
   <script>
     const video = document.getElementById('video');
