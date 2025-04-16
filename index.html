@@ -73,7 +73,7 @@
     }
   
     #instructions {
-      margin-bottom: 10px;
+      margin-bottom: 2px;
       font-size: 18px;
       font-weight: bold;
       text-align: center;
@@ -81,14 +81,14 @@
     }
   
     button {
-      padding: 12px 20px;
+      padding: 10px 20px;
       font-size: 16px;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin: 8px 0;
+      margin: 2px 0;
       width: 90%;
       transition: background-color 0.3s;
     }
@@ -98,11 +98,11 @@
     }
   
     input[type="text"] {
-      padding: 10px;
+      padding: 5px;
       font-size: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin-bottom: 15px;
+      margin-bottom: 5px;
       width: 90%;
       text-align: center;
     }
@@ -122,9 +122,10 @@
       z-index: 999;
       display: none;
     }
-  
+    
     video {
-      display: none;
+      display: block;
+      width:100%;
     }
   
     /* Move timer and status to right panel */
@@ -139,7 +140,13 @@
     #timer {
       order: 2;
     }
-  
+
+    .instruction-vid {
+      display: block;
+      width: 100%; /* Make the video span full width of its container */
+      max-width: 100%; /* Prevent the video from stretching beyond its container */
+      margin: 0 auto; /* Center the video inside its container */
+    }
     /* Remove borders from container sides */
     .container {
       border-left: none;
@@ -157,7 +164,15 @@
     </div>
 
     <div class="right">
-      <div id="instructions">Stand 3 feet away from the camera</div>
+
+      <div class="instruction-vid">
+        <video controls class="w-full rounded-xl shadow-lg">
+          <source src="/ExerciseCounter-Video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      <div id="instructions">Stand 5 feet away from the camera</div>
       <input type="text" id="nameInput" placeholder="Enter your name" />
       <div id="userName" style="display:none;"></div>
       <button id="startBtn">Start Jumping Jacks</button>
@@ -167,7 +182,7 @@
   </div>
 
   <div id="countdownOverlay">3</div>
-  <video id="video" autoplay playsinline></video>
+  <!-- <video id="video" autoplay playsinline></video> -->
 
   <script>
     const video = document.getElementById('video');
