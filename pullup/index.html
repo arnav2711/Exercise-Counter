@@ -161,6 +161,7 @@
       <div id="userName" style="display:none;"></div>
       <button id="startBtn">Start Jumping Jacks</button>
       <button id="startKneeBtn">Start Knee Touches</button>
+      <button id="startPullupBtn">Start Pull-Ups</button>
       <div class="infoBox" id="liveCount">Count: 0</div>
     </div>
   </div>
@@ -180,6 +181,7 @@
     const nameInput = document.getElementById('nameInput');
     const userName = document.getElementById('userName');
     const status = document.getElementById('status');
+    const startPullupBtn = document.getElementById('startPullupBtn');
 
     let detector;
     let jumpingJackCount = 0;
@@ -190,6 +192,9 @@
     let mode = null;
     let state = 'down';
     let kneeState = 'down';
+    let pullupCount = 0;
+    let pullupState = 'down';
+
 
     nameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && nameInput.value.trim()) {
@@ -280,6 +285,12 @@
       });
     }
 
+    function startPullUps() {
+      mode = 'pullup';
+      pullupState = 'down';
+    }
+
+
     async function detectPose() {
       const poses = await detector.estimatePoses(video);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -350,6 +361,29 @@
             kneeState = 'down';
           }
         }
+
+        const leftShoulder = getKeypoint('left_shoulder');
+        const rightShoulder = getKeypoint('right_shoulder');
+
+        if (mode === 'pullup' && leftShoulder && rightShoulder && leftElbow && rightElbow) {
+          const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+          const avgElbowY = (leftElbow.y + rightElbow.y) / 2;
+
+          // Detect "up" position
+          if (avgShoulderY < 150 && pullupState === 'down') {
+            pullupState = 'up';
+          }
+
+          // Detect "down" position (rep completed)
+          if (avgShoulderY > 200 && pullupState === 'up') {
+            if (counting) {
+              pullupCount++;
+              liveCount.innerText = `Count: ${pullupCount}`;
+            }
+            pullupState = 'down';
+          }
+        }
+
       }
 
       requestAnimationFrame(detectPose);
@@ -374,6 +408,16 @@
         startKneeTouches();
       }
     );
+
+    startPullupBtn.addEventListener('click', () => {
+      if (nameInput.value.trim()) {
+        updateNameDisplay();
+      }
+      runCountdown();
+      startTimer();
+      startPullUps();
+    });
+
 
     async function run() {
       await setupCamera();

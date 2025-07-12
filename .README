@@ -1,1 +1,40 @@
 
+# Exercise Counter using TensorFlow.js
+
+This is a web application that uses real-time pose detection powered by TensorFlow.js and the MoveNet model to count exercises such as Jumping Jacks and Knee Touches using your webcam.
+
+## Features
+
+- Real-time pose detection using your camera
+- Detects and counts:
+  - Jumping Jacks
+  - Knee Touches
+- Live pose skeleton overlay on the video feed
+- 60-second timer for each session
+- Countdown overlay before starting
+- Responsive user interface
+
+## How It Works
+
+The app uses the MoveNet SinglePose Lightning model from TensorFlow.js to detect 17 keypoints on the human body, including elbows, knees, and hips. Based on their positions, the app determines whether a full repetition has been completed:
+
+- **Jumping Jacks**: A repetition is counted when both elbows move above a certain height (arms up) and then return below it (arms down).
+- **Knee Touches**: A repetition is counted when either knee rises above the average hip position and then returns below.
+
+The camera feed is rendered to a canvas element, where keypoints and connecting lines are drawn in real-time for visual feedback.
+
+## Technologies Used
+
+- HTML, CSS, JavaScript
+- TensorFlow.js core and WebGL backend
+- TensorFlow.js Pose Detection API
+- MoveNet model (SinglePose Lightning)
+- Canvas API for video rendering and keypoint visualization
+
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/exercise-counter.git
+cd exercise-counter
