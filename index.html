@@ -178,6 +178,7 @@
       <div id="userName" style="display:none;"></div>
       <button id="startBtn">Start Jumping Jacks</button>
       <button id="startKneeBtn">Start Knee Touches</button>
+      <button id="startPullupBtn">Start Pull-Ups</button>
       <div class="infoBox" id="liveCount">Count: 0</div>
     </div>
   </div>
@@ -199,6 +200,7 @@
     const nameInput = document.getElementById('nameInput');
     const userName = document.getElementById('userName');
     const status = document.getElementById('status');
+    const startPullupBtn = document.getElementById('startPullupBtn');
 
     let detector;
     let jumpingJackCount = 0;
@@ -209,6 +211,11 @@
     let mode = null;
     let state = 'down';
     let kneeState = 'down';
+    let pullupCount = 0;
+    let pullupState = 'down';
+
+    let shoulderYBuffer = [];
+    const bufferMaxLength = 10;
 
     nameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && nameInput.value.trim()) {
@@ -247,6 +254,7 @@
   
       jumpingJackCount = 0;
       kneeTouchCount = 0;
+      pullupCount = 0;
       timeLeft = 63;
       liveCount.innerText = `Count: 0`;
       timerDisplay.innerText = `Timer: ${timeLeft}s`;
@@ -297,6 +305,11 @@
       runCountdown(() => {
         startTimer();
       });
+    }
+
+    function startPullUps() {
+      mode = 'pullup';
+      pullupState = 'down';
     }
 
     async function detectPose() {
@@ -369,6 +382,42 @@
             kneeState = 'down';
           }
         }
+
+        if (mode === 'pullup') {
+          const leftShoulder = getKeypoint('left_shoulder');
+          const rightShoulder = getKeypoint('right_shoulder');
+          const leftElbow = getKeypoint('left_elbow');
+          const rightElbow = getKeypoint('right_elbow');
+
+          if (leftShoulder && rightShoulder && leftElbow && rightElbow) {
+            const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+            const avgElbowY = (leftElbow.y + rightElbow.y) / 2;
+
+            shoulderYBuffer.push(avgShoulderY);
+            if (shoulderYBuffer.length > bufferMaxLength) {
+              shoulderYBuffer.shift();
+            }
+
+            // Check if the shoulder has been falling consistently
+            const isFalling = shoulderYBuffer.every((val, i, arr) => i === 0 || val > arr[i - 1]);
+
+
+            // Detect "up" when shoulders rise above elbows
+            if (avgShoulderY < avgElbowY - 5 && pullupState === 'down') {
+              pullupState = 'up';
+            }
+            
+            // Detect "down" when shoulders fall below elbows again
+            if (avgShoulderY > avgElbowY + 5 && pullupState === 'up' ) {
+              if (counting) {
+                pullupCount++;
+                liveCount.innerText = `Count: ${pullupCount}`;
+              }
+              pullupState = 'down';
+            }
+          }
+        }
+
       }
 
       requestAnimationFrame(detectPose);
@@ -393,6 +442,15 @@
         startKneeTouches();
       }
     );
+
+    startPullupBtn.addEventListener('click', () => {
+      if (nameInput.value.trim()) {
+        updateNameDisplay();
+      }
+      runCountdown();
+      startTimer();
+      startPullUps();
+    });
 
     async function run() {
       await setupCamera();
