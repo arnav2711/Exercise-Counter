@@ -217,6 +217,8 @@
     let shoulderYBuffer = [];
     const bufferMaxLength = 10;
 
+
+
     nameInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && nameInput.value.trim()) {
         updateNameDisplay();
@@ -400,10 +402,11 @@
 
             // Check if the shoulder has been falling consistently
             const isFalling = shoulderYBuffer.every((val, i, arr) => i === 0 || val > arr[i - 1]);
+            const top25PercentY = canvas.height * 0.25;
 
 
             // Detect "up" when shoulders rise above elbows
-            if (avgShoulderY < avgElbowY - 5 && pullupState === 'down') {
+            if (avgShoulderY < avgElbowY - 5 && pullupState === 'down' && avgShoulderY < top25PercentY) {
               pullupState = 'up';
             }
             
