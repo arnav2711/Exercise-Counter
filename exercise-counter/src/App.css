@@ -1,0 +1,145 @@
+body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+    }
+  
+    .container {
+      display: flex;
+      flex-direction: row;
+      width: 95%;
+      max-width: 1100px;
+      height: 90vh;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+  
+    .left {
+      flex: 2;
+      padding: 20px;
+      background-color: #f0f8ff;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .right {
+      flex: 1;
+      padding: 30px 20px;
+      background-color: #e6f7ff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+    }
+  
+    canvas {
+      border-radius: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+      height: auto;
+    }
+  
+    .infoBox {
+      background-color: #040404;
+      color: #ffffff;
+      padding: 5px 10px;
+      border-radius: 10px;
+      margin: 10px 0;
+      font-size: 24px;
+      width: 100%;
+      text-align: center;
+    }
+  
+    #instructions {
+      margin-bottom: 2px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      color: #0056b3;
+    }
+  
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 2px 0;
+      width: 90%;
+      transition: background-color 0.3s;
+    }
+  
+    button:hover {
+      background-color: #0056b3;
+    }
+  
+    input[type="text"] {
+      padding: 5px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 5px;
+      width: 90%;
+      text-align: center;
+    }
+  
+    .countdownOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      font-size: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      display: none;
+    }
+
+    .video2{
+      display:block;
+      width:100%;
+    }
+    video {
+      display: block;
+      width:100%;
+    }
+  
+    /* Move timer and status to right panel */
+    #timer, #status {
+      margin: 5px 0;
+    }
+  
+    #status {
+      order: 1;
+    }
+  
+    #timer {
+      order: 2;
+    }
+
+    .instruction-vid {
+      display: block;
+      width: 100%; /* Make the video span full width of its container */
+      max-width: 100%; /* Prevent the video from stretching beyond its container */
+      margin: 0 auto; /* Center the video inside its container */
+    }
+    /* Remove borders from container sides */
+    .container {
+      border-left: none;
+      border-right: none;
+    }
