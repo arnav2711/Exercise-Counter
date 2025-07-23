@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://arnavmody.github.io/exercise-counter",
+  "homepage": "https://arnavmody.github.io/Exercise-Counter",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
