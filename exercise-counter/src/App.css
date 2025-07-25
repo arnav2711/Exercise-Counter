@@ -66,6 +66,13 @@ body {
       text-align: center;
       color: #0056b3;
     }
+
+    #userName {
+      color: #333; /* Or whatever color you want */
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
   
     button {
       padding: 10px 20px;
@@ -94,7 +101,7 @@ body {
       text-align: center;
     }
   
-    .countdownOverlay {
+    .countdown-overlay {
       position: absolute;
       top: 0;
       left: 0;
@@ -107,7 +114,6 @@ body {
       justify-content: center;
       align-items: center;
       z-index: 999;
-      display: none;
     }
 
     .video2{

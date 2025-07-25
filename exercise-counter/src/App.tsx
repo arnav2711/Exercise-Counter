@@ -45,8 +45,9 @@ export default function App() {
     const ctx = canvas.getContext('2d')!;
 
     const pose = new Pose({
-      locateFile: (file) => `/node_modules/@mediapipe/pose/${file}`,
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`,
     });
+
 
     pose.setOptions({
       modelComplexity: 1,
@@ -86,6 +87,8 @@ export default function App() {
           rightKnee: 26,
           leftShoulder: 11,
           rightShoulder: 12,
+          leftWrist: 15,
+          rightWrist: 16,
         };
 
         const get = (part: keyof typeof POSE_LANDMARKS) => {
@@ -101,13 +104,22 @@ export default function App() {
         const rightKnee = get("rightKnee");
         const leftShoulder = get("leftShoulder");
         const rightShoulder = get("rightShoulder");
+        const leftWrist = get("leftWrist");
+        const rightWrist = get("rightWrist");
 
         // Logic for each mode
-        if (mode === 'jumpingJack' && leftElbow && rightElbow) {
+        if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip) {
+          const wristY = (leftWrist.y + rightWrist.y) / 2;
+          const hipY = (leftHip.y + rightHip.y) / 2;
+          // const rightWristX = rightWrist.x;
+          // const leftWristX = leftWrist.x;
+          // const rightHipX = rightHip.x;
+          // const leftHipX = leftHip.x;
+          
           const thresholdY = 0.5;
           if (leftElbow.y < thresholdY && rightElbow.y < thresholdY && stateRef.current === 'down') {
             stateRef.current = 'up';
-          } else if (leftElbow.y > thresholdY && rightElbow.y > thresholdY && stateRef.current === 'up') {
+          } else if ((wristY - hipY) < 0.05 && Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1 && stateRef.current === 'up') {
             setCount((c) => c + 1);
             stateRef.current = 'down';
           }
@@ -127,7 +139,7 @@ export default function App() {
         if (mode === 'pullup' && leftShoulder && rightShoulder && leftElbow && rightElbow) {
           const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
           const avgElbowY = (leftElbow.y + rightElbow.y) / 2;
-          if (avgShoulderY < avgElbowY - 0.05 && pullupStateRef.current === 'down' && avgShoulderY < 0.3) {
+          if (avgShoulderY < avgElbowY - 0.05 && pullupStateRef.current === 'down' && avgShoulderY < 0.25) {
             pullupStateRef.current = 'up';
           } else if (avgShoulderY > avgElbowY + 0.05 && pullupStateRef.current === 'up') {
             setCount((c) => c + 1);
@@ -187,12 +199,13 @@ export default function App() {
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ position: 'relative' }}>
       {countdown !== null && (
         <div className="countdown-overlay">
           <div>{countdown}</div>
         </div>
       )}
+
 
       <div className="left">
         <h1 style={{ color: 'black' }}>Exercise Counter</h1>
