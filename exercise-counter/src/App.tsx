@@ -108,7 +108,7 @@ export default function App() {
         const rightWrist = get("rightWrist");
 
         // Logic for each mode
-        if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip) {
+        if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip && leftShoulder && rightShoulder) {
           const wristY = (leftWrist.y + rightWrist.y) / 2;
           const hipY = (leftHip.y + rightHip.y) / 2;
           // const rightWristX = rightWrist.x;
@@ -116,12 +116,15 @@ export default function App() {
           // const rightHipX = rightHip.x;
           // const leftHipX = leftHip.x;
           
-          const thresholdY = 0.5;
-          if (leftElbow.y < thresholdY && rightElbow.y < thresholdY && stateRef.current === 'down') {
+          // const thresholdY = 0.5;
+          if (leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y && stateRef.current === 'down') {
             stateRef.current = 'up';
-          } else if ((wristY - hipY) < 0.05 && Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1 && stateRef.current === 'up') {
-            setCount((c) => c + 1);
-            stateRef.current = 'down';
+          } else if (Math.abs(wristY - hipY) < 0.05 && stateRef.current === 'up') {
+            if(Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1) {
+              setCount((c) => c + 1);
+              stateRef.current = 'down';
+            }
+            
           }
         }
 
