@@ -154,7 +154,7 @@ export default function App() {
         if (mode === 'squat' && leftHip && rightHip && leftKnee && rightKnee) {
           const avgHipY = (leftHip.y + rightHip.y) / 2;
           const avgKneeY = (leftKnee.y + rightKnee.y) / 2;
-          if (avgHipY < avgKneeY - 0.3 && squatStateRef.current === 'down') {
+          if (avgHipY < avgKneeY - 0.225 && squatStateRef.current === 'down') {
             squatStateRef.current = 'up';
             console.log(squatStateRef.current);
           } else if (avgHipY > avgKneeY - 0.2 && squatStateRef.current === 'up') {
