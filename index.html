@@ -314,6 +314,10 @@
       pullupState = 'down';
     }
 
+    function arePointsVisible(...points) {
+          return points.every(p => p && p.visibility !== undefined && p.visibility > 0.5);
+        }
+
     async function detectPose() {
       const poses = await detector.estimatePoses(video);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -357,6 +361,7 @@
           const thresholdY = 200;
           if (leftElbow.y < thresholdY && rightElbow.y < thresholdY && state === 'down') {
             state = 'up';
+            console.log(state);
           }
 
           if (leftElbow.y > thresholdY && rightElbow.y > thresholdY && state === 'up') {
@@ -365,25 +370,50 @@
               liveCount.innerText = `Count: ${jumpingJackCount}`;
             }
             state = 'down';
+            console.log(state);
           }
         }
+
+        let visibleStartTime = null;
+        let visibilityBufferPassed = false;
 
         if (mode === 'kneeTouch' && leftKnee && rightKnee && leftHip && rightHip) {
           const hipY = (leftHip.y + rightHip.y) / 2;
           const kneeY = Math.min(leftKnee.y, rightKnee.y);
 
-          if (kneeY < hipY + 10 && kneeState === 'down') {
-            kneeState = 'up';
+          const allVisible = arePointsVisible(leftKnee, rightKnee, leftHip, rightHip);
+
+          if (allVisible) {
+            if (!visibleStartTime) {
+              visibleStartTime = Date.now();
+            } else if (!visibilityBufferPassed && Date.now() - visibleStartTime >= 2000) {
+              visibilityBufferPassed = true;
+              console.log('Visibilty buffer passed, ready to count.');
+            }
+          } else {
+            console.log('Visibilty Buffer Failed')
+            visibleStartTime = null;
+            visibilityBufferPassed = false;
           }
 
-          if (kneeY > hipY + 30 && kneeState === 'up') {
-            if (counting) {
-              kneeTouchCount++;
-              liveCount.innerText = `Count: ${kneeTouchCount}`;
+          if (visibilityBufferPassed) {
+            if (kneeY < hipY && kneeState === 'down') {
+              kneeState = 'up';
+              console.log(kneeState);
             }
-            kneeState = 'down';
+
+            if (kneeY > hipY && kneeState === 'up') {
+              if (counting) {
+                kneeTouchCount++;
+                liveCount.innerText = `Count: ${kneeTouchCount}`;
+              }
+
+              kneeState = 'down';
+              console.log(kneeState);
+            }
           }
         }
+
 
         if (mode === 'pullup') {
           const leftShoulder = getKeypoint('left_shoulder');
