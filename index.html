@@ -372,11 +372,11 @@
           const hipY = (leftHip.y + rightHip.y) / 2;
           const kneeY = Math.min(leftKnee.y, rightKnee.y);
 
-          if (kneeY < hipY && kneeState === 'down') {
+          if (kneeY < hipY + 10 && kneeState === 'down') {
             kneeState = 'up';
           }
 
-          if (kneeY > hipY + 10 && kneeState === 'up') {
+          if (kneeY > hipY + 30 && kneeState === 'up') {
             if (counting) {
               kneeTouchCount++;
               liveCount.innerText = `Count: ${kneeTouchCount}`;
