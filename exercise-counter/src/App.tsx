@@ -12,7 +12,7 @@ export default function App() {
   const [name, setName] = useState('');
   const [count, setCount] = useState(0);
   const [timer, setTimer] = useState(60);
-  const [mode, setMode] = useState<'jumpingJack' | 'kneeTouch' | 'pullup' | null>(null);
+  const [mode, setMode] = useState<'jumpingJack' | 'kneeTouch' | 'pullup' | 'squat' | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [readyToCount, setReadyToCount] = useState(false);
 
@@ -21,6 +21,7 @@ export default function App() {
   const stateRef = useRef('down');
   const kneeStateRef = useRef('down');
   const pullupStateRef = useRef('down');
+  const squatStateRef = useRef('up');
 
   // Countdown: 3-2-1
   const runCountdown = (callback: () => void) => {
@@ -131,9 +132,9 @@ export default function App() {
         if (mode === 'kneeTouch' && leftHip && rightHip && leftKnee && rightKnee) {
           const hipY = (leftHip.y + rightHip.y) / 2;
           const kneeY = Math.min(leftKnee.y, rightKnee.y);
-          if (kneeY < hipY - 0.05 && kneeStateRef.current === 'down') {
+          if (kneeY < hipY + 0.15 && kneeStateRef.current === 'down') {
             kneeStateRef.current = 'up';
-          } else if (kneeY > hipY + 0.05 && kneeStateRef.current === 'up') {
+          } else if (kneeY > hipY + 0.25 && kneeStateRef.current === 'up') {
             setCount((c) => c + 1);
             kneeStateRef.current = 'down';
           }
@@ -147,6 +148,19 @@ export default function App() {
           } else if (avgShoulderY > avgElbowY + 0.05 && pullupStateRef.current === 'up') {
             setCount((c) => c + 1);
             pullupStateRef.current = 'down';
+          }
+        }
+
+        if (mode === 'squat' && leftHip && rightHip && leftKnee && rightKnee) {
+          const avgHipY = (leftHip.y + rightHip.y) / 2;
+          const avgKneeY = (leftKnee.y + rightKnee.y) / 2;
+          if (avgHipY < avgKneeY - 0.3 && squatStateRef.current === 'down') {
+            squatStateRef.current = 'up';
+            console.log(squatStateRef.current);
+          } else if (avgHipY > avgKneeY - 0.2 && squatStateRef.current === 'up') {
+            setCount((c) => c + 1);
+            squatStateRef.current = 'down';
+            console.log(squatStateRef.current);
           }
         }
       }
@@ -253,8 +267,8 @@ export default function App() {
           {mode === 'kneeTouch' && readyToCount ? 'Stop Knee Touches' : 'Start Knee Touches'}
         </button>
 
-        <button onClick={() => handleStart('pullup')}>
-          {mode === 'pullup' && readyToCount ? 'Stop Pull-Ups' : 'Start Pull-Ups'}
+        <button onClick={() => handleStart('squat')}>
+          {mode === 'squat' && readyToCount ? 'Stop Squats' : 'Start Squats'}
         </button>
 
         <div className="infoBox">Count: {count}</div>
