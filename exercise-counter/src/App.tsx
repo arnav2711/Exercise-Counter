@@ -23,6 +23,11 @@ export default function App() {
   const pullupStateRef = useRef('down');
   const squatStateRef = useRef('up');
 
+  const lastShoulderYRef = useRef<number | null>(null);
+  const lastUpdateTimeRef = useRef<number>(Date.now());
+  const shoulderWentDownRef = useRef(false);
+
+
   // Countdown: 3-2-1
   const runCountdown = (callback: () => void) => {
     let counter = 3;
@@ -151,13 +156,30 @@ export default function App() {
           }
         }
 
-        if (mode === 'squat' && leftHip && rightHip && leftKnee && rightKnee) {
+        if (mode === 'squat' && leftHip && rightHip && leftKnee && rightKnee &&leftShoulder && rightShoulder) {
+
           const avgHipY = (leftHip.y + rightHip.y) / 2;
           const avgKneeY = (leftKnee.y + rightKnee.y) / 2;
+          const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+
+          const now = Date.now();
+
+          if (now - lastUpdateTimeRef.current >= 250) {
+            const lastY = lastShoulderYRef.current;
+            if (lastY !== null && avgShoulderY > lastY + 0.03) {
+              // Shoulders went down significantly
+              shoulderWentDownRef.current = true;
+            } else {
+              shoulderWentDownRef.current = false;
+            }
+            lastShoulderYRef.current = avgShoulderY;
+            lastUpdateTimeRef.current = now;
+          }
+
           if (avgHipY < avgKneeY - 0.225 && squatStateRef.current === 'down') {
             squatStateRef.current = 'up';
             console.log(squatStateRef.current);
-          } else if (avgHipY > avgKneeY - 0.2 && squatStateRef.current === 'up') {
+          } else if (avgHipY > avgKneeY - 0.175 && squatStateRef.current === 'up' && shoulderWentDownRef.current) {
             setCount((c) => c + 1);
             squatStateRef.current = 'down';
             console.log(squatStateRef.current);
