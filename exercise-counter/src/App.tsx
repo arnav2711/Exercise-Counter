@@ -112,14 +112,14 @@ export default function App() {
           rightWrist: 16,
         };
 
+
         function isReadyForJumpingJack(
           leftElbow: any, rightElbow: any, leftWrist: any, rightWrist: any,
           leftShoulder: any, rightShoulder: any
         ): boolean {
-          if (!leftElbow || !rightElbow || !leftWrist || !rightWrist || !leftShoulder || !rightShoulder) return false;
 
-          const armsUp = leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y;
-          return armsUp;
+          const avgShoulderY = (leftShoulder.y + rightShoulder.y) / 2;
+          return avgShoulderY >= 0.38 && avgShoulderY <= 0.6;
         }
 
 
@@ -142,10 +142,20 @@ export default function App() {
 
         // Logic for each mode
         if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip && leftShoulder && rightShoulder) {
-          console.log('hi');
           const ready = isReadyForJumpingJack(leftElbow, rightElbow, leftWrist, rightWrist, leftShoulder, rightShoulder);
-          console.log(ready);
+          console.log('isreadyfor jumpingJack:', ready);
           poseQualityColor = ready ? 'green' : 'red';
+
+          // drawConnectors(ctx, bodyOnlyLandmarks, POSE_CONNECTIONS, {
+          //   color: poseQualityColor,
+          //   lineWidth: 2,
+          // });
+
+          drawLandmarks(ctx, bodyOnlyLandmarks, {
+            color: poseQualityColor,
+            lineWidth: 2,
+          });
+
           const wristY = (leftWrist.y + rightWrist.y) / 2;
           const hipY = (leftHip.y + rightHip.y) / 2;
           // const rightWristX = rightWrist.x;
