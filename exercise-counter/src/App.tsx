@@ -69,6 +69,7 @@ export default function App() {
       ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
       if (results.poseLandmarks) {
+        let poseQualityColor = 'red';
         const FACE_LANDMARK_INDICES = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
         const filteredConnections = POSE_CONNECTIONS.filter(
@@ -87,7 +88,7 @@ export default function App() {
         const bodyOnlyLandmarks = results.poseLandmarks.filter((_, i) => !faceIndices.has(i));
 
         drawLandmarks(ctx, bodyOnlyLandmarks, {
-          color: '#3912b8ff',
+          color: poseQualityColor,
           lineWidth: 2,
         });
 
@@ -111,6 +112,17 @@ export default function App() {
           rightWrist: 16,
         };
 
+        function isReadyForJumpingJack(
+          leftElbow: any, rightElbow: any, leftWrist: any, rightWrist: any,
+          leftShoulder: any, rightShoulder: any
+        ): boolean {
+          if (!leftElbow || !rightElbow || !leftWrist || !rightWrist || !leftShoulder || !rightShoulder) return false;
+
+          const armsUp = leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y;
+          return armsUp;
+        }
+
+
         const get = (part: keyof typeof POSE_LANDMARKS) => {
           const landmark = landmarks[POSE_LANDMARKS[part]];
           return landmark && landmark.visibility! > 0.5 ? landmark : null;
@@ -126,9 +138,14 @@ export default function App() {
         const rightShoulder = get("rightShoulder");
         const leftWrist = get("leftWrist");
         const rightWrist = get("rightWrist");
+        
 
         // Logic for each mode
         if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip && leftShoulder && rightShoulder) {
+          console.log('hi');
+          const ready = isReadyForJumpingJack(leftElbow, rightElbow, leftWrist, rightWrist, leftShoulder, rightShoulder);
+          console.log(ready);
+          poseQualityColor = ready ? 'green' : 'red';
           const wristY = (leftWrist.y + rightWrist.y) / 2;
           const hipY = (leftHip.y + rightHip.y) / 2;
           // const rightWristX = rightWrist.x;
