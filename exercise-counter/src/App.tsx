@@ -69,14 +69,28 @@ export default function App() {
       ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
       if (results.poseLandmarks) {
-        drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, {
+        const FACE_LANDMARK_INDICES = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+        const filteredConnections = POSE_CONNECTIONS.filter(
+          ([a, b]) => !FACE_LANDMARK_INDICES.has(a) && !FACE_LANDMARK_INDICES.has(b)
+        );
+
+        drawConnectors(ctx, results.poseLandmarks, filteredConnections, {
           color: '#161b16ff',
           lineWidth: 4,
         });
-        drawLandmarks(ctx, results.poseLandmarks, {
+
+        const faceIndices = new Set([
+          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 // nose, eyes, ears
+        ]);
+
+        const bodyOnlyLandmarks = results.poseLandmarks.filter((_, i) => !faceIndices.has(i));
+
+        drawLandmarks(ctx, bodyOnlyLandmarks, {
           color: '#3912b8ff',
           lineWidth: 2,
         });
+
 
         if (!readyToCount) {
           ctx.restore();
