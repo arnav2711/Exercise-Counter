@@ -13,7 +13,7 @@ export default function App() {
   const [count, setCount] = useState(0);
   const [timer, setTimer] = useState(60);
   const [mode, setMode] = useState<'jumpingJack' | 'kneeTouch' | 'pullup' | 'squat' | null>(null);
-  const [countdown, setCountdown] = useState<number | null>(null);
+  const [countdown] = useState<number | null>(null);
   const [readyToCount, setReadyToCount] = useState(false);
 
   const [tempName, setTempName] = useState('');
@@ -27,23 +27,34 @@ export default function App() {
   const lastUpdateTimeRef = useRef<number>(Date.now());
   const shoulderWentDownRef = useRef(false);
 
+  const [preparingExercise, setPreparingExercise] = useState<typeof mode | null>(null);
+  // const [setPoseReadyStart] = useState<number | null>(null);
+  const poseReadyStartRef = useRef<number | null>(null);
+  const [, setPoseHeldFor3Sec] = useState(false);
+  const [showPoseReadyOverlay, setShowPoseReadyOverlay] = useState(false);
+
+  const poseTriggeredRef = useRef(false);
+
+
+
+
 
   // Countdown: 3-2-1
-  const runCountdown = (callback: () => void) => {
-    let counter = 3;
-    setCountdown(counter);
-    const interval = setInterval(() => {
-      counter--;
-      if (counter === 0) {
-        clearInterval(interval);
-        setCountdown(null);
-        setReadyToCount(true);
-        callback();
-      } else {
-        setCountdown(counter);
-      }
-    }, 1000);
-  };
+  // const runCountdown = (callback: () => void) => {
+  //   let counter = 3;
+  //   setCountdown(counter);
+  //   const interval = setInterval(() => {
+  //     counter--;
+  //     if (counter === 0) {
+  //       clearInterval(interval);
+  //       setCountdown(null);
+  //       setReadyToCount(true);
+  //       callback();
+  //     } else {
+  //       setCountdown(counter);
+  //     }
+  //   }, 1000);
+  // };
 
   useEffect(() => {
     const video = videoRef.current!;
@@ -67,6 +78,21 @@ export default function App() {
       ctx.save();
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+
+      // Draw horizontal reference lines
+        ctx.beginPath();
+        ctx.moveTo(0, 0.38 * canvas.height);
+        ctx.lineTo(canvas.width, 0.38 * canvas.height);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0.6 * canvas.height);
+        ctx.lineTo(canvas.width, 0.6 * canvas.height);
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
       if (results.poseLandmarks) {
         let poseQualityColor = 'red';
@@ -98,6 +124,7 @@ export default function App() {
           return;
         }
 
+
         const landmarks = results.poseLandmarks;
         const POSE_LANDMARKS = {
           leftElbow: 13,
@@ -114,7 +141,6 @@ export default function App() {
 
 
         function isReadyForJumpingJack(
-          leftElbow: any, rightElbow: any, leftWrist: any, rightWrist: any,
           leftShoulder: any, rightShoulder: any
         ): boolean {
 
@@ -142,28 +168,62 @@ export default function App() {
 
         // Logic for each mode
         if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip && leftShoulder && rightShoulder) {
-          const ready = isReadyForJumpingJack(leftElbow, rightElbow, leftWrist, rightWrist, leftShoulder, rightShoulder);
-          console.log('isreadyfor jumpingJack:', ready);
-          poseQualityColor = ready ? 'green' : 'red';
+          const ready = isReadyForJumpingJack(leftShoulder, rightShoulder);
+          console.log(`Jumping Jack ready: ${ready}`);
 
-          // drawConnectors(ctx, bodyOnlyLandmarks, POSE_CONNECTIONS, {
-          //   color: poseQualityColor,
-          //   lineWidth: 2,
-          // });
+
+          // Track if user has held the correct pose for 3 seconds
+          if (!poseTriggeredRef.current) {
+
+            poseQualityColor = ready ? 'green' : 'red';
+
+            if (ready) {
+              if (poseReadyStartRef.current === null) {
+                poseReadyStartRef.current = Date.now();
+              } else if (Date.now() - poseReadyStartRef.current >= 3000) {
+                poseTriggeredRef.current = true;
+                setPoseHeldFor3Sec(true);
+                setShowPoseReadyOverlay(true);
+                poseReadyStartRef.current = null;
+
+                setTimeout(() => {
+                  setShowPoseReadyOverlay(false);
+                  setReadyToCount(true);
+                }, 1000);
+              }
+            } else {
+              poseReadyStartRef.current = null; // pose broken
+            }
+            
+
+            drawLandmarks(ctx, bodyOnlyLandmarks, {
+              color: poseQualityColor,
+              lineWidth: 2,
+            });
+            ctx.restore();
+            return;
+          }
+
+          poseQualityColor = 'blue';
 
           drawLandmarks(ctx, bodyOnlyLandmarks, {
             color: poseQualityColor,
             lineWidth: 2,
           });
+          ctx.restore();
+
+          
+
+
+
+          // drawLandmarks(ctx, bodyOnlyLandmarks, {
+          //   color: poseQualityColor,
+          //   lineWidth: 2,
+          // });
 
           const wristY = (leftWrist.y + rightWrist.y) / 2;
           const hipY = (leftHip.y + rightHip.y) / 2;
-          // const rightWristX = rightWrist.x;
-          // const leftWristX = leftWrist.x;
-          // const rightHipX = rightHip.x;
-          // const leftHipX = leftHip.x;
-          
-          // const thresholdY = 0.5;
+    
           if (leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y && stateRef.current === 'down') {
             stateRef.current = 'up';
           } else if (Math.abs(wristY - hipY) < 0.05 && stateRef.current === 'up') {
@@ -267,15 +327,28 @@ export default function App() {
     if (mode === exercise && readyToCount) {
       setMode(null);
       setReadyToCount(false);
+      setPoseHeldFor3Sec(false);
+      poseReadyStartRef.current = null;
+      poseTriggeredRef.current = false;
+
       return;
     }
     setMode(null);
     setCount(0);
     setTimer(60);
     setReadyToCount(false);
-    runCountdown(() => {                
-      setMode(exercise);
-      console.log(`${exercise} started`)});
+    setPoseHeldFor3Sec(false);
+    poseReadyStartRef.current = null;
+    poseTriggeredRef.current = false;
+
+    setPreparingExercise(exercise);
+
+    setTimeout(() => {
+    setPreparingExercise(null);
+    setMode(exercise);
+    setReadyToCount(true);
+    console.log(`${exercise} started`);
+  }, 3000);
   };
 
   return (
@@ -285,6 +358,20 @@ export default function App() {
           <div>{countdown}</div>
         </div>
       )}
+
+      {preparingExercise && (
+        <div className="exercise-overlay">
+          <p>Please arrange yourself till the dots are green</p>
+        </div>
+      )}
+
+      {showPoseReadyOverlay && (
+        <div className="pose-ready-overlay">
+          <p>Pose ready! Starting now...</p>
+        </div>
+      )}
+
+
 
 
       <div className="left">
