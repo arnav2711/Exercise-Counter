@@ -204,7 +204,8 @@ export default function App() {
             return;
           }
 
-          poseQualityColor = 'blue';
+          const readyAfterOverlay = isReadyForJumpingJack(leftShoulder, rightShoulder);
+          poseQualityColor = readyAfterOverlay ? 'blue' : 'red';
 
           drawLandmarks(ctx, bodyOnlyLandmarks, {
             color: poseQualityColor,
@@ -224,10 +225,10 @@ export default function App() {
           const wristY = (leftWrist.y + rightWrist.y) / 2;
           const hipY = (leftHip.y + rightHip.y) / 2;
     
-          if (leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y && stateRef.current === 'down') {
+          if (leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y && stateRef.current === 'down' && isReadyForJumpingJack(leftShoulder,rightShoulder)) {
             stateRef.current = 'up';
           } else if (Math.abs(wristY - hipY) < 0.05 && stateRef.current === 'up') {
-            if(Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1) {
+            if(Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1 && isReadyForJumpingJack(leftShoulder, rightShoulder)) {
               setCount((c) => c + 1);
               stateRef.current = 'down';
             }
