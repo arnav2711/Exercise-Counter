@@ -81,15 +81,15 @@ export default function App() {
 
       // Draw horizontal reference lines
         ctx.beginPath();
-        ctx.moveTo(0, 0.38 * canvas.height);
-        ctx.lineTo(canvas.width, 0.38 * canvas.height);
+        ctx.moveTo(0, 0.35 * canvas.height);
+        ctx.lineTo(canvas.width, 0.35 * canvas.height);
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 1;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(0, 0.6 * canvas.height);
-        ctx.lineTo(canvas.width, 0.6 * canvas.height);
+        ctx.moveTo(0, 0.55 * canvas.height);
+        ctx.lineTo(canvas.width, 0.55 * canvas.height);
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 1;
         ctx.stroke();
