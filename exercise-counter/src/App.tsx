@@ -11,7 +11,7 @@ export default function App() {
 
   const [name, setName] = useState('');
   const [count, setCount] = useState(0);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(600);
   const [mode, setMode] = useState<'jumpingJack' | 'kneeTouch' | 'pullup' | 'squat' | null>(null);
   const [countdown] = useState<number | null>(null);
   const [readyToCount, setReadyToCount] = useState(false);
@@ -34,6 +34,9 @@ export default function App() {
   const [showPoseReadyOverlay, setShowPoseReadyOverlay] = useState(false);
 
   const poseTriggeredRef = useRef(false);
+
+  const [poseIncorrect, setPoseIncorrect] = useState(false);
+
 
 
 
@@ -81,8 +84,8 @@ export default function App() {
 
       // Draw horizontal reference lines
         ctx.beginPath();
-        ctx.moveTo(0, 0.35 * canvas.height);
-        ctx.lineTo(canvas.width, 0.35 * canvas.height);
+        ctx.moveTo(0, 0.42 * canvas.height);
+        ctx.lineTo(canvas.width, 0.42 * canvas.height);
         ctx.strokeStyle = 'blue';
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -168,6 +171,7 @@ export default function App() {
 
         // Logic for each mode
         if (mode === 'jumpingJack' && leftElbow && rightElbow && leftWrist && rightWrist && leftHip && rightHip && leftShoulder && rightShoulder) {
+          setPoseIncorrect(false);
           const ready = isReadyForJumpingJack(leftShoulder, rightShoulder);
           console.log(`Jumping Jack ready: ${ready}`);
 
@@ -208,7 +212,7 @@ export default function App() {
           poseQualityColor = readyAfterOverlay ? 'blue' : 'red';
 
           drawLandmarks(ctx, bodyOnlyLandmarks, {
-            color: poseQualityColor,
+            color: 'blue',
             lineWidth: 2,
           });
           ctx.restore();
@@ -225,15 +229,19 @@ export default function App() {
           const wristY = (leftWrist.y + rightWrist.y) / 2;
           const hipY = (leftHip.y + rightHip.y) / 2;
     
-          if (leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y && stateRef.current === 'down' && isReadyForJumpingJack(leftShoulder,rightShoulder)) {
+          if (leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y && stateRef.current === 'down') {
             stateRef.current = 'up';
           } else if (Math.abs(wristY - hipY) < 0.05 && stateRef.current === 'up') {
-            if(Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1 && isReadyForJumpingJack(leftShoulder, rightShoulder)) {
+            if(Math.abs(rightWrist.x - rightHip.x) < 0.1 && Math.abs(leftWrist.x - leftHip.x) < 0.1) {
               setCount((c) => c + 1);
               stateRef.current = 'down';
             }
             
           }
+        }
+        else if (!leftElbow || !rightElbow || !leftWrist || !rightWrist || !leftHip || !rightHip || !leftShoulder || !rightShoulder) {
+          setPoseIncorrect(true);
+  
         }
 
         if (mode === 'kneeTouch' && leftHip && rightHip && leftKnee && rightKnee) {
@@ -308,7 +316,7 @@ export default function App() {
     if (!readyToCount) return;
 
     setCount(0);
-    setTimer(60);
+    setTimer(600);
     const interval = setInterval(() => {
       setTimer((t) => {
         if (t <= 1) {
@@ -336,7 +344,7 @@ export default function App() {
     }
     setMode(null);
     setCount(0);
-    setTimer(60);
+    setTimer(600);
     setReadyToCount(false);
     setPoseHeldFor3Sec(false);
     poseReadyStartRef.current = null;
@@ -369,6 +377,12 @@ export default function App() {
       {showPoseReadyOverlay && (
         <div className="pose-ready-overlay">
           <p>Pose ready! Starting now...</p>
+        </div>
+      )}
+
+      {poseIncorrect && (
+        <div className="incorrect-overlay">
+          <p>INCORRECT</p>
         </div>
       )}
 
